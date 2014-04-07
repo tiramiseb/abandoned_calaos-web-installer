@@ -1,0 +1,64 @@
+(lp0
+(dp1
+Vinputs
+p2
+(lp3
+(dp4
+Vvariable
+p5
+I0
+sVname
+p6
+VFirst switch
+p7
+sa(dp8
+Vvariable
+p9
+I1
+sVname
+p10
+VSecond switch
+p11
+sasVtype
+p12
+VKitchen
+p13
+sVname
+p14
+VKitchen
+p15
+sVoutputs
+p16
+(lp17
+(dp18
+Vvariable
+p19
+I0
+sVname
+p20
+VMain light
+p21
+sasa(dp22
+Vinputs
+p23
+(lp24
+sVtype
+p25
+VLounge
+p26
+sVname
+p27
+VLiving room
+p28
+sVoutputs
+p29
+(lp30
+(dp31
+Vvariable
+p32
+I1
+sVname
+p33
+VFirst light
+p34
+sasa.

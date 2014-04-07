@@ -1,0 +1,7 @@
+.kateproject
+.kateproject.d/
+*.pyc
+bin/
+include/
+lib/
+local/

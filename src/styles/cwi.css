@@ -1,0 +1,24 @@
+.buttons {
+    text-align: right;
+    width: 100px;
+}
+
+.alignleft {
+    text-align: left;
+}
+
+.selected {
+    background-color: #fdd !important;
+}
+
+.selectedrule {
+    font-weight: bold;
+}
+
+.iorow {
+    padding-left: 2em !important;
+}
+
+.on-drag-enter {
+    background-color: #efe;
+}

@@ -1,0 +1,322 @@
+ <!DOCTYPE html>
+<html ng-app="CalaosWebInstaller">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1,
+                                   maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="static/assets/bootstrap.min.css">
+    <link rel="stylesheet" href="static/cwi.css">
+    <script src="static/assets/angular.min.js"></script>
+    <script src="static/assets/ui-bootstrap-tpls-0.10.0.min.js"></script>
+    <script src="static/assets/draganddrop.js"></script>
+    <script src="static/cwi.js"></script>
+</head>
+<body ng-controller="GlobalCtrl">
+<noscript>
+    <p>Please enable JavaScript in your browser.</p>
+    <p><a href="http://www.enable-javascript.com/" target="_blank">Discover how!</a></p>
+</noscript>
+
+<div class="container-fluid">
+<div class="row"><div class="col-md-12"><div class="page-header">
+  <h1>Calaos Web Installer <small>configure your home automation</small> <button class="btn btn-success" ng-click="save_data()">Save</button></h1>
+</div></div></div>
+<div class="row">
+
+
+
+<div class="col-md-4">
+    <div class="panel panel-default">
+        <div class="panel-heading">Home</div>
+        <div class="panel-body">
+            <table class="table">
+                <tbody ng-repeat="room in config.io">
+                <tr ng-class="{selected: details.type=='room'&&details.room==room}">
+                    <td ng-click="room_details(room)">
+                        <span ng-switch on="room.type">
+                            <img ng-switch-when="Lounge"  src="static/images/lounge_xsmall.png">
+                            <img ng-switch-when="Kitchen" src="static/images/kitchen_xsmall.png">
+                            <img ng-switch-when="Bedroom" src="static/images/bedroom_xsmall.png">
+                            <img ng-switch-default        src="static/images/lounge_xsmall.png">
+</span>
+                        {{ room.name }}
+                    </td>
+                    <td class="buttons">
+                        <div class="btn-group btn-group-xs">
+                            <button type="button" class="btn btn-info">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                            <a href="#" type="button" class="btn btn-success dropdown-toggle">
+                                <span class="glyphicon glyphicon-plus"></span>
+                            </a>
+                            <ul class="dropdown-menu alignleft">
+                                <li><a ng-click="add_input(room)">
+                                    <img src="static/images/switch.png"> Add a switch
+                                </a></li>
+                                <li><a ng-click="add_output(room)">
+                                    <img src="static/images/light.png"> Add a light
+                                </a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                <tr ng-class="{selected: details.type=='input'&&details.input==input}" ng-repeat="input in room.inputs" ui-draggable="true" drag="{type:'input', object: input}">
+                    <td ng-click="input_details(input)" colspan="2" class="iorow">
+                        <img src="static/images/switch.png"> {{ input.name }}
+                    </td>
+                </tr>
+                <tr ng-class="{selected: details.type=='output'&&details.output==output}" ng-repeat="output in room.outputs" ui-draggable="true" drag="{type:'output', object: output}">
+                    <td ng-click="output_details(output)" colspan="2" class="iorow">
+                        <img src="static/images/light.png"> {{ output.name }}
+                    </td>
+                </tr>
+                </tbody>
+                <tr>
+                    <td colspan="2">
+                        <button class="btn btn-info" ng-click="add_room()">Add a room</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-4">
+    <div class="panel panel-default">
+        <div class="panel-heading">Rules</div>
+        <div class="panel-body">
+            <table class="table">
+                <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                </tr>
+                <tr ng-repeat="rule in config.rules" ng-class="{selected: details.type=='rule'&&details.rule==rule, selectedrule: selectedrule==rule}" ng-click="rule_details(rule)">
+                    <td>{{ rule.type }}</td>
+                    <td>{{ rule.name }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button class="btn btn-info" ng-click="add_rule()">Add a rule</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="panel panel-default" ng-show="selectedrule" ui-on-Drop="drop_on_condition($event,$data)">
+        <div class="panel-heading">Conditions for ({{ selectedrule.type }}) {{ selectedrule.name }}</div>
+        <div class="panel-body">
+            <table class="table">
+                <tr>
+                    <th>Input</th>
+                    <th>Operator</th>
+                    <th>Value</th>
+                </tr>
+                <tr ng-class="{selected: details.type=='condition'&&details.condition==condition}" ng-repeat="condition in selectedrule.conditions" ng-click="condition_details(condition)">
+                    <td>{{condition.input.name}}</td>
+                    <td>{{condition.operator}}</td>
+                    <td>{{condition.value}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="panel panel-default" ng-show="selectedrule" ui-on-Drop="drop_on_action($event,$data)">
+        <div class="panel-heading">Actions for ({{ selectedrule.type }}) {{ selectedrule.name }}</div>
+        <div class="panel-body">
+            <table class="table">
+                <tr>
+                    <th>Output</th>
+                    <th>Value</th>
+                </tr>
+                <tr ng-class="{selected: details.type=='action'&&details.action==action}" ng-repeat="action in selectedrule.actions" ng-click="action_details(action)">
+                    <td>{{action.output.name}}</td>
+                    <td>{{action.value}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-4">
+
+    <!-- Room details -->
+    <div class="panel panel-default" ng-show="details.type=='room'">
+        <div class="panel-heading selected">Room details: {{ details.room.name }}</div>
+        <div class="panel-body">
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="roomname" class="col-sm-2 control-label">
+                        Name
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="text" id="roomname" class="form-control" ng-model="details.room.name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="roomtype" class="col-sm-2 control-label">
+                        Type
+                    </label>
+                    <div class="col-sm-10">
+                        <select id="roomtype" class="form-control" ng-model="details.room.type" ng-options="t for t in roomtypes"></select>
+                    </div>
+                </div>
+            </form>
+            <button class="btn btn-danger" ng-click="remove_room(details.room)">Remove room</button>
+        </div>
+    </div>
+
+    <!-- Input details -->
+    <div class="panel panel-default" ng-show="details.type=='input'">
+        <div class="panel-heading selected">Input details: {{ details.input.name }}</div>
+        <div class="panel-body">
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="inputname" class="col-sm-2 control-label">
+                        Name
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="text" id="inputname" class="form-control" ng-model="details.input.name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputvar" class="col-sm-2 control-label">
+                        Variable
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="number" id="inputvar" class="form-control" ng-model="details.input.variable" min=0>
+                    </div>
+                </div>
+            </form>
+            <button class="btn btn-danger" ng-click="remove_input(details.input)">Remove switch</button>
+        </div>
+    </div>
+
+    <!-- Output details -->
+    <div class="panel panel-default" ng-show="details.type=='output'">
+        <div class="panel-heading selected">Output details: {{ details.output.name }}</div>
+        <div class="panel-body">
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="outputname" class="col-sm-2 control-label">
+                        Name
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="text" id="outputname" class="form-control" ng-model="details.output.name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="outputvar" class="col-sm-2 control-label">
+                        Variable
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="number" id="outputvar" class="form-control" ng-model="details.output.variable" min=0>
+                    </div>
+                </div>
+            </form>
+            <button class="btn btn-danger" ng-click="remove_output(details.output)">Remove light</button>
+        </div>
+    </div>
+
+    <!-- Rule details -->
+    <div class="panel panel-default" ng-show="details.type=='rule'">
+        <div class="panel-heading selected">Rule details: {{ details.rule.name }}</div>
+        <div class="panel-body">
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="ruletype" class="col-sm-2 control-label">
+                        Type
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="text" id="ruletype" class="form-control" ng-model="details.rule.type">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="rulename" class="col-sm-2 control-label">
+                        Name
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="text" id="rulename" class="form-control" ng-model="details.rule.name">
+                    </div>
+                </div>
+            </form>
+            <button class="btn btn-danger" ng-click="remove_rule(details.rule)">Remove rule</button>
+        </div>
+    </div>
+
+    <!-- Condition details -->
+    <div class="panel panel-default" ng-show="details.type=='condition'">
+        <div class="panel-heading selected">Condition details</div>
+        <div class="panel-body">
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="conditioninput" class="col-sm-2 control-label">
+                        Input
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="text" id="conditioninput" class="form-control" ng-model="details.condition.input.name" disabled>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="conditionoperator" class="col-sm-2 control-label">
+                        Operator
+                    </label>
+                    <div class="col-sm-10">
+                        <select id="conditionoperator" class="form-control" ng-model="details.condition.operator" ng-options="o for o in operators"></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="conditionvalue" class="col-sm-2 control-label">
+                        Value
+                    </label>
+                    <div class="col-sm-10">
+                        <select id="conditionvalue" class="form-control" ng-model="details.condition.value" ng-options="v for v in inputvalues"></select>
+                    </div>
+                </div>
+            </form>
+            <button class="btn btn-danger" ng-click="remove_condition(details.condition)">Remove condition</button>
+        </div>
+    </div>
+
+    <!-- Action details -->
+    <div class="panel panel-default" ng-show="details.type=='action'">
+        <div class="panel-heading selected">Action details</div>
+        <div class="panel-body">
+            <form class="form-horizontal" role="form">
+                <div class="form-group">
+                    <label for="actionoutput" class="col-sm-2 control-label">
+                        Output
+                    </label>
+                    <div class="col-sm-10">
+                        <input type="text" id="actionoutput" class="form-control" ng-model="details.action.output.name" disabled>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="actionvalue" class="col-sm-2 control-label">
+                        Output
+                    </label>
+                    <div class="col-sm-10">
+                        <div class="input-group">
+                            <input type="text" id="actionvalue" class="form-control" ng-model="details.action.value">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default dropdown-toggle"><span class="caret"></span></button>
+                                <ul class="dropdown-menu pull-right">
+                                    <li><a href="#" ng-click="details.action.value='true'">true - turn on the light</a></li>
+                                    <li><a href="#" ng-click="details.action.value='false'">false - turn off the light</a></li>
+                                    <li><a href="#" ng-click="details.action.value='toggle'">toggle - toggle the light</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="#" ng-click="details.action.value='impulse X'">impulse X - turn on the light during X ms</a></li>
+                                    <li><a href="#" ng-click="details.action.value='impulse W X Y Z'">impulse W X Y Z - turn on/off the light according to a given scheme</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <button class="btn btn-danger" ng-click="remove_action(details.action)">Remove action</button>
+        </div>
+    </div>
+</div>
+
+
+
+</div>
+</div>
+</body>
