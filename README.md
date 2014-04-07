@@ -16,3 +16,5 @@ First try for a web-base version of Calaos Installer.
     cd [...]/calaos-web-installer
     source bin/activate
     ./calaos_web_installer.py
+
+Then access http://localhost:5000.
