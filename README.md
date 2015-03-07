@@ -1,6 +1,9 @@
 calaos-web-installer
 ====================
 
+
+***THIS PROJECT HAS BEEN ABANDONED***
+
 First try for a web-base version of Calaos Installer.
 
 # Installation
